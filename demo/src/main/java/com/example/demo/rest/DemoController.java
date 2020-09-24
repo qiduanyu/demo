@@ -12,6 +12,7 @@ public class DemoController {
 
     @GetMapping("/showHello")
     public String showHello(){
+        System.out.println("master");
         return "hello";
     }
 
