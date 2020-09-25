@@ -13,6 +13,8 @@ public class DemoController {
     @GetMapping("/showHello")
     public String showHello(){
         System.out.println("master");
+        System.out.println("test1");
+        System.out.println("test2");
         return "hello";
     }
 
