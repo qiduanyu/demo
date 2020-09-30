@@ -1,12 +1,25 @@
 server:
   port: 8888
 spring:
+  application:
+    name: demo
+#  profiles: dev
+---
+spring:
   datasource:
-    url: jdbc:mysql://127.0.0.1/test?useSSL=false&useUnicode=true&characterEncoding=UTF-8
+    url: jdbc:mysql://127.0.0.1/test?useSSL=false&useUnicode=true&characterEncoding=UTF-8&serverTimezone=GMT
     username: root
     password: 123456
     driver-class-name: com.mysql.cj.jdbc.Driver
+    dbcp2:
+      min-idle: 5           #数据库连接池的最小维持连接数
+      initial-size: 5       #初始化连接数
+      max-idle: 5           #最大连接数
+      max-wait-millis: 15   #等待获取链接的最大超时时间
   security:
     user:
       name: admin
       password: 123456
+#mybatis配置路径
+mybatis:
+  mapper-locations: classpath*:/mapper/**.xml
