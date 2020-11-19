@@ -7,8 +7,11 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 @Mapper
-public interface UserMapper {
-
-    void add(@Param("user") User user);
-
+public interface HrMapper {
+    /**
+     * 通过用户名查询用户信息
+     * @param s 用户名
+     * @return 用户信息
+     */
+    User loadUserByUsername(@Param("username") String s);
 }

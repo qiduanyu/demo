@@ -16,10 +16,6 @@ spring:
       initial-size: 5       #初始化连接数
       max-idle: 5           #最大连接数
       max-wait-millis: 15   #等待获取链接的最大超时时间
-  security:
-    user:
-      name: admin
-      password: 123456
 #mybatis配置路径
 mybatis:
   mapper-locations: classpath*:/mapper/**.xml
