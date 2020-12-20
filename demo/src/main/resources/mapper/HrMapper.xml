@@ -5,4 +5,13 @@
     <select id="loadUserByUsername" resultType="com.example.demo.dto.user.User">
         SELECT username,password from user where username = #{username}
     </select>
+
+    <select id="loadUserRoleByUsername" resultType="com.example.demo.dto.user.Role">
+<!--         SELECT r.id,r.role_code,r.role_name FROM role r LEFT JOIN user_role_rel u ON r.role_code = u.role_code AND u.username = #{username}-->
+        SELECT * FROM role WHERE role_code = (SELECT role_code FROM user_role_rel WHERE username = #{username})
+    </select>
+
+    <select id="queryRoles" resultType="com.example.demo.dto.user.Role">
+        SELECT * FROM role
+    </select>
 </mapper>

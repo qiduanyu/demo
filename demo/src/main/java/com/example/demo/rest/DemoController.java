@@ -34,8 +34,7 @@ public class DemoController {
     @GetMapping("/genPublicKey")
     @ApiOperation(value = "genPublicKey",notes = "获取公钥字符串")
     public String genPublicKey() throws NoSuchAlgorithmException {
-        String s = RSACoder.genPublicKeyPair(RSACoder.CONFIG_KEY.getBytes());
-        return s;
+        return RSACoder.genPublicKeyPair(RSACoder.CONFIG_KEY.getBytes());
     }
 
 }
