@@ -4,16 +4,14 @@ import com.example.demo.common.dto.ApiResponseEntity;
 import com.example.demo.dto.user.User;
 import com.example.demo.service.RoleService;
 import com.example.demo.utils.ApiResponseUtils;
+import com.example.demo.utils.TokenUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * @author 75412
@@ -38,6 +36,23 @@ public class RoleController {
     ){
 //        userService.add(user);
         return ApiResponseUtils.success();
+    }
+
+    @ApiOperation(value = "生成token")
+    @GetMapping("/token")
+    public ApiResponseEntity<String> token(
+            @ApiParam(value = "用户账号") @RequestParam String username,
+            @ApiParam(value = "用户密码") @RequestParam String password
+    ){
+        return ApiResponseUtils.success(TokenUtils.token(username,password));
+    }
+
+    @ApiOperation(value = "验证token")
+    @GetMapping("/verifyToken")
+    public ApiResponseEntity<Boolean> verifyToken(
+            @ApiParam(value = "用户token") @RequestParam String token
+    ){
+        return ApiResponseUtils.success(TokenUtils.verify(token));
     }
 
 }

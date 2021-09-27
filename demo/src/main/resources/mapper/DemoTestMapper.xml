@@ -1,0 +1,392 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace= "com.example.demo.mybatis.mapper.DemoTestMapper" >
+    <select id="queryCaptcha" resultType="com.example.demo.quartz.Captcha">
+        SELECT * FROM test_captcha
+    </select>
+
+    <select id="queryUserByAccount" resultType="com.example.demo.quartz.LoginUser">
+        SELECT username,user_id,token FROM test_user where account = #{account}
+    </select>
+    <select id="queryUserByToken" resultType="com.example.demo.quartz.LoginUser">
+        SELECT username,user_id FROM test_user where token = #{token}
+    </select>
+
+    <select id="queryMenusByUserId" resultType="com.example.demo.quartz.Menu">
+        SELECT * FROM test_menu where user_id = #{userId} AND parent_id = '0'
+    </select>
+    <select id="queryMenusByParentId" resultType="com.example.demo.quartz.Menu">
+        SELECT * FROM test_menu where parent_id = #{parentId}
+    </select>
+
+    <select id="queryPhoneByAccount" resultType="java.lang.String">
+        SELECT phone FROM test_user where account = #{account}
+    </select>
+
+    <select id="queryUserByPhone" resultType="com.example.demo.quartz.LoginUser">
+        SELECT * FROM test_user where phone = #{phone}
+    </select>
+
+    <select id="queryProjectsByUserId" resultType="com.example.demo.quartz.Project">
+        SELECT * FROM test_project where parent_id = '0' AND project_code in (select  project_code from test_project_user where user_id = #{userId})
+    </select>
+    <select id="queryProjectsByParentId" resultType="com.example.demo.quartz.Project">
+        SELECT * FROM test_project where parent_id = #{parentId}
+    </select>
+
+    <select id="queryFacilitiesByProjectIdAndType" resultType="com.example.demo.quartz.FacilitiesMid">
+        SELECT * FROM test_facilities WHERE project_code in
+        <foreach collection="allSearch.projectCode" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        AND type = #{type}
+        <if test="allSearch.searchVal != null and allSearch.searchVal != ''">
+            AND type_val like  #{allSearch.searchVal}"%"
+        </if>
+    </select>
+
+    <select id="queryFacilitiesByProjectIdAndTypeRight" resultType="com.example.demo.quartz.FacilitiesMid">
+        SELECT * FROM test_facilities WHERE project_code in
+        <foreach collection="allSearch.projectCode" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        AND type = #{type}
+        <if test="allSearch.searchVal != null and allSearch.searchVal != ''">
+            AND type_val like  "%"#{allSearch.searchVal}
+        </if>
+        <if test="facilitiesCode != null and facilitiesCode != ''">
+            AND parent_facilities_code = #{facilitiesCode}
+        </if>
+    </select>
+
+<!--    <select id="queryTypeCodeByFacilitiesMidCode" resultType="com.example.demo.quartz.FacilitiesMid">-->
+<!--        SELECT type_code FROM test_facilities WHERE project_code in-->
+<!--        <foreach collection="allSearch.projectCode" index="index" item="item" open="(" separator="," close=")">-->
+<!--            #{item}-->
+<!--        </foreach>-->
+<!--        AND type = #{type}-->
+<!--        <if test="allSearch.searchVal != null and allSearch.searchVal != ''">-->
+<!--            AND type_val like  "%"#{allSearch.searchVal}"%"-->
+<!--        </if>-->
+<!--    </select>-->
+
+    <select id="queryFacilitiesMinByProjectIdAndFacilitiesMid" resultType="com.example.demo.quartz.FacilitiesMin">
+        SELECT * FROM test_facilities WHERE
+        project_code =  #{allSearch.projectCode}
+        AND parent_facilities_code = #{allSearch.facilitiesMidCode}
+        <if test="allSearch.facilitiesMinCode != null and allSearch.facilitiesMinCode != ''">
+            AND facilities_code = #{allSearch.facilitiesMinCode}
+        </if>
+    </select>
+
+    <select id="queryAttrByFacilitiesCode" resultType="com.example.demo.quartz.FacilitiesAttr">
+        SELECT * FROM test_facilities_attr WHERE facilities_code = #{facilitiesCode}
+    </select>
+
+    <select id="queryDetailsByFacilitiesCodeAndAttr" resultType="com.example.demo.quartz.FacilitiesAttrDetails">
+        SELECT * FROM test_facilities_attr_details WHERE facilities_code = #{facilitiesCode} AND attribute_id = #{attr}
+    </select>
+
+    <insert id="insertTestData" parameterType="com.example.demo.quartz.Mapper.ProjectMapper">
+        INSERT into test_project VALUES (#{project.projectCode},#{project.projectName},'f99386ab82e842fe8c6af0d411c4789a',#{project.parentId});
+    </insert>
+
+    <insert id="insertTestMenuData" parameterType="com.example.demo.quartz.Mapper.MenuMapper">
+        INSERT INTO test_menu (`menu_id`, `menu_code`, `menu_name`, `path`, `icon`, `permission`, `user_id`, `parent_id`)
+        VALUES (#{menu.menuId},#{menu.menuCode},#{menu.menuName},#{menu.path},'iVBORw0KGgoAAAANSUhEUgAAACwAAAAtCAYAAADV2ImkAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAH/SURBVGhD7ZixLwRBFIf9nVpqvRKlKKjoUKAgulO5RKFyBQkKGlGeAkEim4txn8kkk8tv927f3c5ZdpIvW7y99757M/s22Zksy1ydaISrphGumr8n3L7queX9Lze/4dzs6uQhL/mpo+oPkiv8/Jb9JFJFqoJ61FU+gVzh1LIB6iqfgBRuX/ZkslRQX3mBFF7am053A9RXXiCFq3rARoX6yguksEqSGuUF/1N4cdu5w3PPzqlzC1v6vjIoLxhLGNHui5Pr4s6fRfW7UVBeYBZeO/ZiH5/OHfU7u3LgBbmeXfsYf8YqrbzAJMyWv/dFkc3b/s2Wl7551PFhKC8wCZ90vAzdVPEAnR/lPoXyApPw06tzD10di+E4sDgiKl6E8gKTcBkJjs2t4VgoLzALd+51bBDW1IU5DkwAFYth7LE48ypehPICk/Bu24twVfEAu8CyvEiUF5iEgS6zGF8qHmax5YED5QVmYbY7SDNrw2u51d/++O3HvOZelaMI5QVmYWBsMWuZBPFi7NF5RIlZpJUXjCUcw8sBBsWs0soLJiZchEVaeUESYSgrrbwgmTAEac64iscoL0gqDEjXpsNlUF4ghefWdZJUUF95gRSu3XeJ2n35gWl1uai7kCvMV8TU0tQzf70MsD0kqupBJC/5i45BzFDh30YjXDWNcNXUTDhz3xWSYkAmCR6fAAAAAElFTkSuQmCC',
+                #{menu.permission},'f99386ab82e842fe8c6af0d411c4789a',#{menu.parentId});
+    </insert>
+
+    <insert id="insertTestFacilitiesData" parameterType="com.example.demo.quartz.Mapper.FacilitiesMidMapper">
+        INSERT INTO test_facilities(facilities_code, name, type_code, type_val, address, svg, facilities_type, type, project_code, parent_facilities_code)
+        VALUES (#{facilitiesMidMapper.facilitiesCode}, #{facilitiesMidMapper.name}, #{facilitiesMidMapper.typeCode}, #{facilitiesMidMapper.typeVal}, '测试设施地址', '1', '2', 'min', #{facilitiesMidMapper.projectCode}, #{facilitiesMidMapper.parentFacilitiesCode});
+    </insert>
+
+    <select id="selectProjectCodeByF" resultType="java.lang.String">
+        select project_code from test_facilities where  facilities_code = #{string}
+    </select>
+
+
+    <insert id="insertTestAttr" parameterType="com.example.demo.quartz.Mapper.FacilitiesAttrMapper">
+        INSERT INTO test_facilities_attr( attribute_id, value, facilities_code) VALUES (#{facilitiesAttrMapper.attributeId}, #{facilitiesAttrMapper.value}, #{facilitiesAttrMapper.facilitiesCode});
+    </insert>
+    <insert id="insertTestAttrDetail" parameterType="com.example.demo.quartz.Mapper.FacilitiesAttrDetailsMapper">
+        INSERT INTO test_facilities_attr_details(`key`, key_desc, data_val_str, data_val_type, data_type, attribute_id, facilities_code)
+        VALUES (#{facilitiesAttrDetailsMapper.key}, #{facilitiesAttrDetailsMapper.keyDesc}, #{facilitiesAttrDetailsMapper.dataValStr}, #{facilitiesAttrDetailsMapper.dataValType},
+                #{facilitiesAttrDetailsMapper.dataType}, #{facilitiesAttrDetailsMapper.attributeId}, #{facilitiesAttrDetailsMapper.facilitiesCode});
+    </insert>
+
+    <select id="selectProjectByCode" resultType="com.example.demo.quartz.FacilitiesClass">
+        SELECT 'project' as type ,project_name as name ,COUNT(project_code) as totalnum , '0' as mid FROM test_project WHERE project_code = #{projectCode} GROUP BY project_code,project_name
+    </select>
+
+    <select id="selectProjectByParentCode" resultType="com.example.demo.quartz.FacilitiesClass">
+        SELECT 'Cproject' as type ,project_name as name ,COUNT(project_code) as totalnum , '0' as mid FROM test_project WHERE parent_id = #{projectCode} GROUP BY project_code,project_name
+    </select>
+
+    <select id="selectFacByproject" resultType="com.example.demo.quartz.FacilitiesClass">
+        SELECT type_code as type ,type_val as name ,count(type_code) as totalnum from test_facilities
+        WHERE project_code = #{projectCode} AND facilities_type = #{s}
+
+        <if test=" s == 2 ">
+            and parent_facilities_code = (select facilities_code from test_facilities where project_code = #{projectCode} AND facilities_type = '1' AND type_code = #{typeCode} limit 1)
+        </if>
+
+        GROUP BY type_code,type_val
+
+    </select>
+
+
+    <select id="queryEquipAmountByFacilitiesMidCode" resultType="java.lang.String">
+        SELECT COUNT(1) from test_equip WHERE projectCode = #{equipmentParam.projectCode} and facilitiesMidCode = #{equipmentParam.facilitiesMidCode}
+    </select>
+
+    <select id="queryNameByProjectCodeAndFacilitiesMidCode" resultType="java.lang.String">
+        SELECT name from test_facilities WHERE project_code = #{equipmentParam.projectCode} and facilities_code = #{equipmentParam.facilitiesMidCode}
+    </select>
+
+    <select id="queryFacilitiesEquipmentMinListByProjectCodeAndFacilitiesMidCode" resultType="com.example.demo.quartz.Equipment.FacilitiesEquipmentMin">
+        SELECT count(facilitiesMinCode) as equipAmount,facilitiesMinCode FROM test_equip
+        WHERE projectCode = #{equipmentParam.projectCode} and facilitiesMidCode = #{equipmentParam.facilitiesMidCode} GROUP BY facilitiesMinCode
+    </select>
+
+    <select id="queryequipMinListByProjectCodeAndFacilitiesMidCodeAndFacilitiesMinCode" resultType="com.example.demo.quartz.Equipment.EquipMin">
+        SELECT equipMinName,count(equipMinName) AS equipAmount FROM test_equip
+        WHERE projectCode = #{equipmentParam.projectCode}
+        <if test="equipmentParam.facilitiesMidCode != null and equipmentParam.facilitiesMidCode != ''">
+            and facilitiesMidCode = #{equipmentParam.facilitiesMidCode}
+       </if>
+          and facilitiesMinCode = #{facilitiesMinCode} GROUP BY equipMinName
+    </select>
+
+    <select id="queryequipListByProjectCodeAndFacilitiesMidCodeAndFacilitiesMinCodeAndByEquipMinName" resultType="com.example.demo.quartz.Equipment.Equip">
+        SELECT equipCode ,equipName FROM test_equip
+        WHERE projectCode = #{equipmentParam.projectCode}
+        <if test="equipmentParam.facilitiesMidCode != null and equipmentParam.facilitiesMidCode != ''">
+            and facilitiesMidCode = #{equipmentParam.facilitiesMidCode}
+        </if>
+          and facilitiesMinCode = #{facilitiesMinCode} AND equipMinName = #{equipMinName}
+    </select>
+
+    <select id="queryFacilitiesEquipmentMinListByProjectCodeAndFacilitiesMinCode" resultType="com.example.demo.quartz.Equipment.FacilitiesEquipmentMin">
+        SELECT count(facilitiesMinCode) as equipAmount,facilitiesMinCode FROM test_equip
+        WHERE projectCode = #{equipmentParam.projectCode} and facilitiesMinCode = #{equipmentParam.facilitiesMinCode} GROUP BY facilitiesMinCode
+    </select>
+
+    <select id="queryAttrByEquipCode" resultType="com.example.demo.quartz.FacilitiesAttr">
+        SELECT * FROM test_facilities_attr WHERE equipCode = #{equipmentParam.equipCode}
+    </select>
+
+    <select id="queryDetailsByEquipCodeAndAttr" resultType="com.example.demo.quartz.FacilitiesAttrDetails">
+        SELECT * FROM test_facilities_attr_details WHERE equipCode = #{equipmentParam.equipCode} AND attribute_id = #{attr}
+    </select>
+
+    <select id="queryFacilitiesName" resultType="com.example.demo.quartz.FacilitiesNameResult">
+        SELECT project_code,facilities_code as facilitiesMidCode,`name` as facilitiesMidName FROM test_facilities
+        WHERE facilities_code in
+        <foreach collection="facilitiesNameParam.facilitiesMidCodes" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+          AND project_code in
+        <foreach collection="facilitiesNameParam.projectCodes" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+          AND parent_facilities_code = '0'
+    </select>
+
+    <delete id="deleteByProjectCodeAndFac" >
+        DELETE FROM test_facilities WHERE project_code = #{allSearchAttr.projectCode} AND facilities_code = #{allSearchAttr.facilitiesCode}
+    </delete>
+
+
+    <select id="queryProjectNameByCode" resultType="com.example.demo.quartz.asset.AssetAllResult">
+        SELECT project_code,project_name FROM test_project WHERE project_code in
+        <foreach collection="projectCodes" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <select id="queryTotalInvestment" resultType="com.example.demo.quartz.asset.TotalInvestment">
+        SELECT totalInvestment FROM test_asset_totalinvestment WHERE projectCode = #{projectCode}
+    </select>
+
+    <select id="querySewageTreatment" resultType="com.example.demo.quartz.asset.SewageTreatment">
+        SELECT urbanSewageTreatmentPlantNum,
+               urbanSewageTreatmentPlantScale,
+               ruralSewageTreatmentPlantNum,
+               ruralSewageTreatmentPlantScale
+        FROM test_asset_sewagetreatment WHERE projectCode = #{projectCode}
+    </select>
+
+    <select id="queryPumpStation" resultType="com.example.demo.quartz.asset.PumpStation">
+        SELECT
+            sewagePumpStationNum,
+            sewagePumpStationScale,
+            rainPumpStationNum,
+            rainPumpStationScale,
+            confluencePumpStationNum,
+            confluencePumpStationScale,
+            waterPumpStationNum,
+            waterPumpStationScale,
+            carrWaterPumpStationNum,
+            carrWaterPumpStationScale,
+            transferWaterPumpStationNum,
+            transferWaterPumpStationScale,
+            pressWaterPumpStationNum,
+            pressWaterPumpStationScale,
+            cycleWaterPumpStationNum,
+            cycleWaterPumpStationScale
+        FROM test_asset_pumpstation WHERE projectCode = #{projectCode}
+    </select>
+
+    <select id="queryStoragePool" resultType="com.example.demo.quartz.asset.StoragePool">
+        SELECT
+            num,
+            `scale`
+        FROM test_asset WHERE projectCode = #{projectCode} and type = 'storagePool'
+    </select>
+
+    <select id="queryDrainageNetwork" resultType="com.example.demo.quartz.asset.DrainageNetwork">
+        SELECT
+            combinedLength,
+            sewagePipeLength,
+            stormSewerLength,
+            confluencePipeLength,
+            interceptingPipeLength,
+            interceptingClosureWell,
+            interceptingInspectionWell
+        FROM test_asset_drainagenetwork WHERE projectCode = #{projectCode}
+    </select>
+
+    <select id="queryTownWaterSupplyPlant" resultType="com.example.demo.quartz.asset.TownWaterSupplyPlant">
+        SELECT
+            num,
+            `scale`
+        FROM test_asset WHERE projectCode = #{projectCode} and type = 'townWaterSupplyPlant'
+    </select>
+
+    <select id="queryWaterSupplyPipeNetwork" resultType="com.example.demo.quartz.asset.WaterSupplyPipeNetwork">
+        SELECT
+            combinedLength,
+            originalPipeLength,
+            waterPipeLength,
+            inThePipeLength,
+            ecologicalWaterRefillPipeLength
+        FROM test_asset_watersupplypipenetwork WHERE projectCode = #{projectCode}
+    </select>
+
+    <select id="queryArtificialWetland" resultType="com.example.demo.quartz.asset.ArtificialWetland">
+        SELECT
+            num,
+            area,
+            `scale`
+        FROM test_asset WHERE projectCode = #{projectCode} and type = 'artificialWetland'
+    </select>
+
+    <select id="queryRiver" resultType="com.example.demo.quartz.asset.River">
+        SELECT
+            num,
+            `length`,
+            `scale`,
+            revetment
+        FROM test_asset WHERE projectCode = #{projectCode} and type = 'river'
+    </select>
+
+    <select id="queryAlongTheRiver" resultType="com.example.demo.quartz.asset.AlongTheRiver">
+        SELECT
+            lockNum,
+            damNum,
+            weirNum,
+            dropNum,
+            bridgeAndCulvertStructuresNum,
+            integratedPumpBrakeNum,
+            integratedWaterTreatmentNum,
+            integratedWaterTreatmentScale
+        FROM test_asset_alongtheriver WHERE projectCode = #{projectCode}
+    </select>
+
+    <select id="queryRoad" resultType="com.example.demo.quartz.asset.Road">
+        SELECT
+            num,
+            `length`
+        FROM test_asset WHERE projectCode = #{projectCode} and type = 'road'
+    </select>
+
+    <select id="queryPark" resultType="com.example.demo.quartz.asset.Park">
+        SELECT
+            num,
+            area
+        FROM test_asset WHERE projectCode = #{projectCode} and type = 'park'
+    </select>
+
+    <select id="queryPublicBuildingsAndResidentialAreas" resultType="com.example.demo.quartz.asset.PublicBuildingsAndResidentialAreas">
+        SELECT
+            num,
+            area
+        FROM test_asset WHERE projectCode = #{projectCode} and type = 'publicBuildingsAndResidentialAreas'
+    </select>
+    <select id="queryLakes" resultType="com.example.demo.quartz.asset.Lakes">
+        SELECT
+            num,
+            area
+        FROM test_asset WHERE projectCode = #{projectCode} and type = 'lakes'
+    </select>
+    <select id="queryReservoir" resultType="com.example.demo.quartz.asset.Reservoir">
+        SELECT
+            num,
+            capacity
+        FROM test_asset WHERE projectCode = #{projectCode} and type = 'reservoir'
+    </select>
+    <select id="queryNaturalWetlands" resultType="com.example.demo.quartz.asset.NaturalWetlands">
+        SELECT
+            num,
+            area
+        FROM test_asset WHERE projectCode = #{projectCode} and type = 'naturalWetlands'
+    </select>
+    <select id="querySpongeFacilities" resultType="com.example.demo.quartz.asset.SpongeFacilities">
+        SELECT
+            num,
+            area
+        FROM test_asset WHERE projectCode = #{projectCode} and type = 'spongeFacilities'
+    </select>
+
+    <select id="queryAsserValue" resultType="com.example.demo.quartz.asset.assetValue.AssetValueResult">
+        SELECT
+            facilitiesCode,
+            facilitiesNum,
+            facilitiesUnit,
+            facilitiesType
+        FROM test_asset_value WHERE projectCode in
+        <foreach collection="assetValueParam.projectCodes" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <insert id="insertTestFacilitiesEightData" parameterType="com.example.demo.quartz.FacilitiesMinEight">
+        INSERT INTO test_facilities(facilities_code, name, type_code, type_val, address, svg, facilities_type, type, project_code, parent_facilities_code)
+        VALUES (#{facilitiesMin.facilitiesCode}, '', #{facilitiesMin.typeCode}, #{facilitiesMin.typeVal},
+                #{facilitiesMin.address}, #{facilitiesMin.svg}, #{facilitiesMin.facilitiesType}, #{facilitiesMin.type},
+                #{facilitiesMin.projectCode}, #{facilitiesMin.parentFacilitiesCode});
+    </insert>
+
+    <select id="queryFacilitiesMinByMinCodeAndProjectCode" resultType="com.example.demo.quartz.FacilitiesMinEight">
+        SELECT project_code,parent_facilities_code FROM test_facilities WHERE project_code = #{facilitiesMin.projectCode}
+        AND type = 'min'
+        AND facilities_code = #{facilitiesMin.facilitiesCode}
+    </select>
+
+    <insert id="testAddProject" parameterType="com.example.demo.quartz.Project">
+        INSERT INTO test_project(project_code, project_name, user_id, parent_id)
+        VALUES (#{project.projectCode},  #{project.projectName},'testAdd', #{project.parentCode});
+    </insert>
+
+    <select id="queryProjectByProjectCode" resultType="com.example.demo.quartz.Project">
+        SELECT project_code, project_name,parent_id FROM test_project WHERE project_code = #{projectCode}
+    </select>
+
+    <insert id="testAddProjectToUser" parameterType="java.lang.String">
+        INSERT INTO test_project_user(project_code, user_id)
+        VALUES (#{projectCode},  #{userId});
+    </insert>
+</mapper>
